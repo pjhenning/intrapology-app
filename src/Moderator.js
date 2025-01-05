@@ -12,6 +12,36 @@ class Moderator extends React.Component {
 			areYouSure: false
 		};
 	}
+	componentDidUpdate() {
+		this.handleQueryParamAuthReset();
+	}
+	handleQueryParamAuthReset = () => {
+		if (this.state.passwordCorrect) return;
+		
+		const searchParams = new URLSearchParams(window.location.search);
+		if (searchParams.size === 0) return; // Won't bother with the rest of this if there are no url params
+		
+		const queryResetLogin = searchParams.get('resetAuth');
+		if (queryResetLogin === null) return; // Won't bother with the rest of this if the reset auth param is not present
+		
+		if (
+			!this.props.settings ||
+			!this.props.performance ||
+			this.props.performance === 'loading' ||
+			this.props.performance === 'restarting'
+		) return;
+
+		const {settings} = this.props;
+		if (queryResetLogin === settings.modPassword) {
+			this.setState({passwordCorrect: true});
+			script.initPerformance(this.props.performance, settings.performanceId).then(() => {
+				firebase.database().ref(settings.performanceId).set("restarting");
+				script.startOver(settings.performanceId);
+				this.handleBackButton();
+			});
+		}
+		this.setState({attemptedPassword: true});
+	}
 	handleContinueButton = (id) => {
 		script.continue(this.props.settings.performanceId, this.props.performance);
 	}

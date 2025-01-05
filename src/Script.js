@@ -4,8 +4,8 @@ import axios from 'axios';
 const Story = require('inkjs').Story;
 
 class Script {
-	initPerformance(props, id) {
-		axios.get("./script.json").then((res) => this.setScript(res.data, id, props));
+	async initPerformance(props, id) {
+		return axios.get("./script.json").then((res) => this.setScript(res.data, id, props));
 	}
 	setScript(json, id, props) {
 		this.story = new Story(json);
